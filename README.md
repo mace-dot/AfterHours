@@ -23,8 +23,8 @@ The browser journey uses `/usr/bin/chromium` in this cloud environment. On anoth
 ## Try the complete loop
 
 1. Confirm adult demo access. Choose **Opt into tonight** and review category opt-ins.
-2. Log an activity without an encounter menu. To group another activity, choose **Add activity to this encounter** on an existing entry. Entries start private.
-3. Skip media, or select an optional non-explicit local image/video. No files leave your device.
+2. Choose **Post a moment**, pick a category, then **Keep private** or **Post to the circle**. Scoring is a separate opt-in. Choose **Add to this moment** on an existing entry to group another activity.
+3. After posting, optionally choose **Add a memory** for a non-explicit local image/video. No files leave your device.
 4. Deliberately share an activity and enable its scoring to see standings update. Media sharing remains independent.
 5. Refresh: structured records persist; all temporary media resets.
 6. Review, edit, withdraw or delete an entry. Visit My Stats, League history and Recap.
