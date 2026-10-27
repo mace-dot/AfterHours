@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {fixture,addEntry,changeEntry,total,scores,projection,winners,transition,type Entry} from '../src/domain/game';
+import {fixture,deleteOwnData,addEntry,changeEntry,total,scores,projection,winners,transition,type Entry} from '../src/domain/game';
 const setup=()=>{const n=fixture().nights[0];n.participants.You=['contact','kissing','makeout','hookup','sex','date'];return n;};
 const entry=(id:string,category:Entry['category']='kissing',encounter=id):Entry=>({id,owner:'You',encounter,category,shared:true,scoring:true,created:Date.now()});
 describe('scoring and privacy',()=>{
@@ -13,4 +13,10 @@ describe('scoring and privacy',()=>{
  it('locks draft rules by copying and enforces review deadline',()=>{const n=setup();n.state='draft';const live=transition(n);n.rules.cap=99;expect(live.rules.cap).toBe(3);const review=transition(live);expect(()=>transition(review,review.deadline-1)).toThrow();expect(transition(review,review.deadline).state).toBe('finalized');});
  it('awards tied wins and revises withdrawals after finalization',()=>{const n=fixture().nights[1];expect(winners(n)).toEqual(['Maya','Riley']);const e=n.entries.find(x=>x.owner==='Maya')!;const changed=changeEntry(n,'Maya',e.id,{shared:false});expect(changed.revision).toBe(n.revision+1);expect(winners(changed)).toEqual(['Riley']);});
  it('uses timestamps across midnight and daylight-saving boundaries',()=>{const n=setup();n.start=Date.parse('2026-11-01T01:30:00-04:00');n.end=Date.parse('2026-11-01T02:30:00-05:00');expect(()=>addEntry(n,entry('dst'),Date.parse('2026-11-01T01:45:00-05:00'))).not.toThrow();expect(()=>addEntry(n,entry('end'),n.end)).toThrow();});
+});
+
+it('deleting own data preserves other players, nights, rules and adult access',()=>{
+ const store=fixture();store.adult=true;store.nights[0].participants.You=['kissing'];store.nights[0].entries.push(entry('mine'));store.nights[1].participants.You=['kissing'];store.nights[1].entries.push(entry('old-mine'));
+ const result=deleteOwnData(store,'You');expect(result.adult).toBe(true);expect(result.nights).toHaveLength(store.nights.length);
+ result.nights.forEach((n,i)=>{expect(n.entries).toEqual(store.nights[i].entries.filter(e=>e.owner!=='You'));expect(n.participants.You).toBeUndefined();expect(n.rules).toEqual(store.nights[i].rules);});expect(result.nights[1].revision).toBe(store.nights[1].revision+1);expect(store.nights[0].entries.some(e=>e.owner==='You')).toBe(true);
 });

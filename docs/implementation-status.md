@@ -2,7 +2,7 @@
 
 ## Shipped local milestone (Phases A/B)
 
-React + TypeScript + Vite; responsive nightlife theme, Tonight, anonymous encounter logging, scoring eligibility, independent temporary media sharing, league standings, draft rule editing, night transitions, 12-hour review deadline, tied winners, finalized-result revisions, player stats, recap preview and self-only text export. Versioned localStorage structured records and reset/deletion controls. Two fictional nights with adult players, private entries, encounter caps, ties and a revised result. Temporary object URLs are revoked on removal/unmount; no media bytes are persisted. Image/video size and video duration checks; no autoplay. Dialog keyboard containment, labels, focus states, reduced-motion support and 360px layout.
+React + TypeScript + Vite; responsive nightlife theme, Tonight, anonymous encounter logging, scoring eligibility, independent temporary media sharing, league standings, draft rule editing, night transitions, 12-hour review deadline, tied winners, finalized-result revisions, player stats, recap preview and self-only text export. Versioned localStorage structured records and self-only browser data deletion controls. Two fictional nights with adult players, private entries, encounter caps, ties and a revised result. Temporary object URLs are revoked on removal/unmount; no media bytes are persisted. Image/video size and video duration checks; no autoplay. Dialog keyboard containment, labels, focus states, reduced-motion support and 360px layout.
 
 ## Mocked / deliberately local
 
@@ -10,7 +10,7 @@ You are the only interactive player. Host controls are available as a demo role.
 
 ## Verified
 
-10 domain tests: retry idempotency; physical non-stacking; contact separation; caps after deletion; private projection and award exclusion; category/scoring opt-ins; ownership mutation checks; late entry restrictions; review corrections and deadlines; copied rule snapshots; tied winners and finalized withdrawal revisions; timestamp behavior over DST.
+11 domain tests: retry idempotency; physical non-stacking; contact separation; caps after deletion; private projection and award exclusion; category/scoring opt-ins; ownership mutation checks; late entry restrictions; review corrections and deadlines; copied rule snapshots; tied winners and finalized withdrawal revisions; timestamp behavior over DST.
 
 A focused Chromium mobile journey exercises adult access, category participation, private logging, deliberate sharing/scoring, refresh persistence, deletion/recalculation, recap and stats navigation, no horizontal overflow, and no browser runtime errors. Production build includes strict TypeScript checking.
 

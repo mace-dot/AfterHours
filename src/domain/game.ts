@@ -31,3 +31,9 @@ export function transition(n:Night,now=Date.now()):Night{if(n.state==='draft')re
 export function fixture():Store {const now=Date.now();const make=(id:string,title:string,state:Night['state']):Night=>({id,title,state,start:now-3600000,end:now+4*3600000,deadline:now+16*3600000,rules:structuredClone(defaults),participants:{Jules:['contact','kissing','makeout'],Maya:['contact','kissing','makeout'],Riley:['contact','kissing','makeout']},entries:[],revision:0});const live=make('tonight','The afterparty','live');const old=make('previous','Friday under the stars','finalized');old.start=now-8*86400000;old.end=old.start+4*3600000;old.deadline=old.end+12*3600000;old.revision=1;
  for(const n of [live,old])for(const [i,owner] of ['Maya','Riley','Jules'].entries())for(let j=0;j<(owner==='Jules'?1:4);j++)n.entries.push({id:`${n.id}-${i}-${j}`,owner,encounter:`${i}-${j}`,category:j%2?'contact':'kissing',shared:owner!=='Jules',scoring:true,created:n.start+j});
  return {version:1,adult:false,nights:[live,old],members:['You','Maya','Riley','Jules'],timezone:'America/New_York'};}
+export function deleteOwnData(store:Store,owner:string):Store {
+ return {...store,nights:store.nights.map(n=>{
+  const affected=!!n.participants[owner]||n.entries.some(e=>e.owner===owner);
+  return {...n,participants:Object.fromEntries(Object.entries(n.participants).filter(([id])=>id!==owner)),entries:n.entries.filter(e=>e.owner!==owner),revision:n.revision+(affected&&n.state==='finalized'?1:0)};
+ })};
+}
