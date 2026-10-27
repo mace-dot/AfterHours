@@ -20,3 +20,6 @@ describe('custom Rulebook',()=>{
  it('outsiders cannot vote, repeat votes replace, and expired proposals reject',()=>{const r=makeTemplate('Classic','You');let a=propose({type:'cap',cap:4},'You',['You','Maya'],1,0);expect(()=>vote(a,'outsider',true,1)).toThrow();a=vote(vote(a,'You',true,1),'You',false,2);expect(Object.keys(a.votes)).toHaveLength(1);expect(resolve(a,r,a.deadline).amendment.status).toBe('rejected');expect(()=>vote(a,'Maya',true,a.deadline)).toThrow();});
  it('tiebreak uses assists or shared win from eligible entries only',()=>{const n=make();n.entries=[e('1','dj-song'),{...e('2','wingfriend'),owner:'You',creditedTo:'Friend',confirmedBy:'Friend'}];expect(ruleWinners(n).sort()).toEqual(['Friend','You']);n.rules.tiebreak='assists';expect(ruleWinners(n)).toEqual(['Friend']);});
 });
+it('chooses stack winners before consuming category limits across encounters',()=>{
+ const n=make();n.rules.categories=n.rules.categories.map(c=>({...c,stackGroup:c.id==='dance'||c.id==='dj-song'?'physical':undefined,perNightLimit:c.id==='dance'?1:undefined}));n.entries=[e('1','dance','first'),e('2','dance','second'),e('3','dj-song','first')];expect(ruleTotal(n,'You')).toBe(3);expect(scoreRuleNight(n,'You')['2'].points).toBe(1);
+});
