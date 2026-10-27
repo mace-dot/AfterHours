@@ -1,0 +1,26 @@
+import {test,expect} from '@playwright/test';
+test('write a rulebook, snapshot a night, capture privately, reveal and retain old history',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Enter the demo'}).click();
+ await page.getByRole('button',{name:'League',exact:true}).click();await page.getByRole('button',{name:'Open the Rulebook'}).click();
+ await page.getByLabel('Starter template').selectOption('Wholesome');page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Use Wholesome',exact:true}).click();
+ await page.getByLabel('Point currency name',{exact:true}).fill('Clout');
+ for(const [kind,name,value] of [['Fumbles','Missed the last train','-3'],['Side Quests','Our group song','4'],['Assists','Wingfriend assist','2']]){
+ const section=page.locator('section').filter({has:page.getByRole('heading',{name:kind,exact:true})});await section.getByRole('button',{name:'Add',exact:false}).click();const editor=page.locator('.category-editor');await editor.getByLabel('Name',{exact:true}).fill(name);await editor.getByLabel('Value (−10 to 10)').fill(value);await editor.getByRole('button',{name:'Save rule',exact:true}).click();await expect(section.getByText(new RegExp(name))).toBeVisible();
+ }
+ const before=await page.evaluate(()=>JSON.parse(localStorage.getItem('afterhours-demo-v1')!).nights);
+ await page.getByRole('button',{name:'League',exact:true}).click();await page.getByRole('button',{name:'New night'}).click();await page.getByRole('button',{name:'Start night',exact:true}).click();
+ const snapshot=await page.evaluate(()=>JSON.parse(localStorage.getItem('afterhours-demo-v1')!).nights[0]);expect(snapshot.rulebook.currency).toBe('Clout');expect(snapshot.rulebook.categories.some((c:any)=>c.id==='sex')).toBe(false);
+ await page.getByRole('button',{name:'Tonight',exact:true}).click();await page.getByRole('button',{name:'Opt into tonight'}).click();await page.getByRole('checkbox',{name:'I choose to participate'}).check();await page.getByRole('button',{name:"I'm in",exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Tonight stays sealed'})).toBeVisible();await page.getByRole('button',{name:/Missed the last train.*Only you/}).click();await expect(page.getByText('Private · excluded')).toBeVisible();
+ await page.getByRole('button',{name:'Home safe',exact:false}).click();await page.getByRole('button',{name:'Morning review & recap'}).click();await expect(page.getByText('The stories start here.')).toBeVisible();await expect(page.getByText('CARD 1 / 5')).toBeVisible();await page.getByRole('button',{name:'Next card'}).click();await expect(page.getByText('CARD 2 / 5')).toBeVisible();
+ await page.reload();const after=await page.evaluate(()=>JSON.parse(localStorage.getItem('afterhours-demo-v1')!).nights.slice(1));expect(after).toEqual(before);expect(errors).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+test('a member amendment passes only with a majority and applies to future nights',async({page})=>{
+ await page.goto('/');await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Enter the demo'}).click();await page.getByRole('button',{name:'League',exact:true}).click();await page.getByRole('button',{name:'Open the Rulebook'}).click();
+ await page.getByLabel('Local role preview').selectOption('Maya');const section=page.locator('section').filter({has:page.getByRole('heading',{name:'Fumbles',exact:true})});await section.getByRole('button',{name:'Propose new'}).click();const editor=page.locator('.category-editor');await editor.getByLabel('Name',{exact:true}).fill('Wrong party');await editor.getByRole('button',{name:'Submit amendment'}).click();
+ const amendment=page.locator('article').filter({hasText:'Amendment 1:'});await amendment.getByRole('button',{name:'Vote yes'}).click();await expect(amendment).toContainText('open');await page.getByLabel('Local role preview').selectOption('Riley');await amendment.getByRole('button',{name:'Vote yes'}).click();await expect(amendment).toContainText('open');await page.getByLabel('Local role preview').selectOption('You');await amendment.getByRole('button',{name:'Vote yes'}).click();await expect(amendment).toContainText('passed');await expect(section.getByText(/Wrong party/)).toBeVisible();
+ const data=await page.evaluate(()=>JSON.parse(localStorage.getItem('afterhours-demo-v1')!));expect(data.amendments[0].proposer).toBe('Maya');expect(data.nights.every((n:any)=>!n.rulebook?.categories.some((c:any)=>c.name==='Wrong party'))).toBe(true);
+});
+test('Circle fails closed before the remote permission schema is installed',async({page})=>{
+ await page.route('**/rest/v1/rpc/circle_status',route=>route.fulfill({status:404,contentType:'application/json',body:JSON.stringify({code:'PGRST202',message:'Missing schema'})}));await page.goto('/?circle=1');await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Enter the demo'}).click();await expect(page.getByRole('heading',{name:'Your private space is almost here.'})).toBeVisible();await expect(page.getByRole('button',{name:'Email me a sign-in link'})).toHaveCount(0);
+});
