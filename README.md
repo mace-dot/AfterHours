@@ -54,3 +54,5 @@ The supplied public project configuration is included; Vite environment variable
 4. The Circle is real-account infrastructure, but Rulebooks/game nights are still a separate local demo. Private-media uploads remain disabled pending moderation and processing.
 
 Run `npm run test:rls` for the local real-PostgreSQL authorization suite; it starts and stops a temporary embedded server on port 55437. No Docker or live credentials are required. See `docs/implementation-status.md` for the complete feature/verification matrix and remaining requirements.
+
+Tonight now opens with a group-chat-style demo composer. Type an update and send; normal messages never alter standings. The visible Rulebook button opens a simplified editor with custom names and values up to ±1,000, including 30-point rules. Use **Try our rules in a new night** to test edits without changing an ongoing night. Optional scoring and private/sealed activity capture stay separate from messages.

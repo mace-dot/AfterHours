@@ -1,3 +1,4 @@
+import {type NightMessage} from '../features/conversation/domain';
 import {type LoreItem} from '../features/memory/domain';
 import {type Rulebook,type Amendment,type Modifier} from '../features/rulebook/model';
 import {scoreRuleNight,ruleWinners} from '../features/rulebook/scoring';
@@ -7,7 +8,7 @@ export const labels: Record<Category,string> = {contact:'Contact exchange',kissi
 export type Entry = {id:string; owner:string; encounter:string; category:Category; shared:boolean; scoring:boolean; created:number;confirmedBy?:string;creditedTo?:string;sealed?:boolean;exportConsent?:boolean};
 export type Rules = {points:Record<Category,number>; cap:number};
 export type Night = {id:string; title:string; state:'draft'|'live'|'review'|'finalized'; start:number; end:number; deadline:number; rules:Rules; participants:Record<string,Category[]>; entries:Entry[]; revision:number;rulebook?:Rulebook;modifier?:Modifier;homeSafe?:string[];awardVotes?:Record<string,Record<string,string>>;sealedNight?:boolean};
-export type Store = {version:2; adult:boolean; nights:Night[]; members:string[]; timezone:string;rulebook?:Rulebook;amendments?:Amendment[];optouts?:string[];nickname?:string;avatar?:string;lore?:LoreItem[];usualPrivacy?:'private'|'shared';};
+export type Store = {version:2; adult:boolean; nights:Night[]; members:string[]; timezone:string;rulebook?:Rulebook;amendments?:Amendment[];optouts?:string[];nickname?:string;avatar?:string;lore?:LoreItem[];usualPrivacy?:'private'|'shared';conversation?:NightMessage[];};
 export const defaults:Rules = {points:{contact:1,kissing:2,makeout:2,hookup:2,sex:2,date:1},cap:3};
 export function scores(n:Night,owner:string) {
  if(n.rulebook)return scoreRuleNight({rules:n.rulebook,modifier:n.modifier||'none',entries:n.entries.map(e=>({...e,categoryId:e.category})),participants:n.participants},owner);
@@ -36,7 +37,7 @@ export function fixture():Store {const now=Date.now();const make=(id:string,titl
  for(const n of [live,old])for(const [i,owner] of ['Maya','Riley','Jules'].entries())for(let j=0;j<(owner==='Jules'?1:4);j++)n.entries.push({id:`${n.id}-${i}-${j}`,owner,encounter:`${i}-${j}`,category:j%2?'contact':'kissing',shared:owner!=='Jules',scoring:true,sealed:n.state==='live',created:n.start+j});
  return {version:2,adult:false,nights:[live,old],members:['You','Maya','Riley','Jules'],timezone:'America/New_York'};}
 export function deleteOwnData(store:Store,owner:string):Store {
- return {...store,lore:(store.lore||[]).filter(item=>item.nominator!==owner).map(item=>({...item,votes:item.votes.filter(v=>v!==owner)})),nights:store.nights.map(n=>{
+ return {...store,conversation:(store.conversation||[]).filter(m=>m.owner!==owner),lore:(store.lore||[]).filter(item=>item.nominator!==owner).map(item=>({...item,votes:item.votes.filter(v=>v!==owner)})),nights:store.nights.map(n=>{
   const affected=!!n.participants[owner]||n.entries.some(e=>e.owner===owner);
   return {...n,participants:Object.fromEntries(Object.entries(n.participants).filter(([id])=>id!==owner)),entries:n.entries.filter(e=>e.owner!==owner),revision:n.revision+(affected&&n.state==='finalized'?1:0)};
  })};

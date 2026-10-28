@@ -12,7 +12,7 @@ export function validateRulebook(r:Rulebook){
  if(!Number.isInteger(r.cap)||r.cap<1||r.cap>10)throw Error('Encounter cap must be 1–10.');
  if(r.categories.filter(c=>c.enabled).length>40)throw Error('Maximum 40 enabled categories.');
  if(new Set(r.categories.map(c=>c.id)).size!==r.categories.length)throw Error('Category IDs must be unique.');
- for(const c of r.categories){if(!c.name.trim())throw Error('Categories need a name.');if(!Number.isInteger(c.points)||c.points< -10||c.points>10)throw Error('Category values must be integers from −10 to 10.');if(c.perNightLimit!==undefined&&(!Number.isInteger(c.perNightLimit)||c.perNightLimit<1))throw Error('Category limits must be positive integers.');if(!['moment','side_quest','fumble','assist'].includes(c.kind))throw Error('Unknown category kind.');}
+ for(const c of r.categories){if(!c.name.trim())throw Error('Categories need a name.');if(!Number.isInteger(c.points)||c.points< -1000||c.points>1000)throw Error('Category values must be integers from −1,000 to 1,000.');if(c.perNightLimit!==undefined&&(!Number.isInteger(c.perNightLimit)||c.perNightLimit<1))throw Error('Category limits must be positive integers.');if(!['moment','side_quest','fumble','assist'].includes(c.kind))throw Error('Unknown category kind.');}
  return r;
 }
 export function snapshot(r:Rulebook){return structuredClone(validateRulebook(r));}
