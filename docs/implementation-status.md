@@ -10,13 +10,13 @@
 
 **D — Local memory slice.** Recap nominations, majority-vote Lore domain, source visibility validation, profile Shelf, and basic semester Wrapped excluding private/sealed/unpermitted sensitive records. Local UI records only the actual user's Lore/award vote; it does not invent votes from fictional friends.
 
-## Implemented but NOT applied to the live Supabase project
+## Applied to the live Supabase project
 
 **B — Circle client and migration.** Project `plpvygpgymfwwkflauaa` is configured using the owner-supplied public URL and publishable key. The real Auth health endpoint responded successfully. `supabase/migrations/202610270001_circle.sql` creates RLS-protected profiles, leagues, memberships, hashed expiring/max-use/approval invites, channels, messages/replies, reactions, reports, blocks and restricted future-game tables. Transactional RPCs cover adult profile creation, circle creation, code creation/rotation/revocation/redemption, approvals, channel creation/rename/archive, pins, member removal/ban, leaving and account deletion. Invite attempts are limited to ten per account per hour. Invite usage is recorded; past messages are hidden from new members by default. Anonymous access is limited to a schema-version probe. Circle creation posts a system card.
 
 The browser client implements email magic-link login, adult profile, create/join, channels, text/replies/reactions/pins, author edit/delete, admin delete, code administration, approvals, reporting, blocks/removal and account/leave controls. Realtime notifications trigger authorized refetches, with five-second fallback polling. Signup/chat stays disabled until the schema probe confirms the migration. Auth transitions clear cached Circle state.
 
-**External blocker:** SUPABASE_ACCESS_TOKEN has not been supplied to this runtime. The migration attempt stopped before making changes. A direct hosted RPC probe returned PGRST202 (circle_status missing), confirming the schema is not installed. A draft secret requirement for `api.supabase.com` and required network hosts is saved. Do not claim live Circle readiness, successful invites, or two-browser synchronization. `scripts/apply-supabase.py` applies the reviewed transactional migration once management access is supplied. The Supabase project's Auth Site URL and redirect allowlist must include the actual Vercel origin for magic links.
+**Live application verified:** The migration was applied to project `plpvygpgymfwwkflauaa`. All 15 public tables have RLS enabled and the public `circle_status` probe returns 1. Supabase Auth Site URL is `https://afterhours-gamma-nine.vercel.app`; the redirect allowlist includes that origin’s paths. Hosted checks created three synthetic authenticated accounts and verified invite joining, pre-join history protection, cross-account message visibility, outsider isolation, revoked invitations, removal, and account deletion. Test accounts and their owned circle were deleted afterward. Email delivery and actual two-browser Realtime behavior have not been tested. The game/Rulebook/ritual/memory features remain browser-local and are not made shared by applying this migration. The initial migration is already applied; do not rerun it.
 
 ## Verification evidence
 
@@ -25,11 +25,11 @@ The browser client implements email magic-link login, adult profile, create/join
 - 5 Chromium journeys at 360px: original post/media/persistence/delete flow; authoring custom Fumble/Side Quest/Assist and currency, new-night snapshots, private capture and morning review while retaining older history; member amendment voting and future-only application; Circle signup fails closed when the remote schema is missing; conversational posting persists without altering scores, and a custom 30-point rule can be tried in a fresh night.
 - Production TypeScript/Vite build.
 
-Local PostgreSQL simulates Supabase auth.uid()/roles. Hosted Supabase REST/Auth/Realtime behavior, email delivery, separate-device sync and production deployment are not established by these tests.
+Local PostgreSQL simulates Supabase auth.uid()/roles. Separate hosted REST/Auth checks now verify account and Circle permissions. Email delivery, Realtime subscriptions in two browsers, and shared game synchronization remain unverified.
 
 ## Remaining work from the full brief
 
-- Apply and validate the live schema, configure Auth redirects, and run two-account hosted end-to-end tests.
+- Complete real email-login and two-browser Realtime tests. The schema, Auth redirects, and hosted cross-account REST permission checks are complete.
 - Connect league Rulebooks, game nights, entries, authoritative scoring, amendments, ballots, check-ins and memory to server operations. These remain browser-local; their database tables intentionally have no client write access.
 - Per-IP invitation abuse limits at a trusted edge; account rate limiting alone is not the complete requirement.
 - Role assignment/ownership transfer UI and custom roles; channel reordering UI; structured mentions/notifications, typing/unread indicators, real threads beyond replies, reaction customization, channel pin lists and ephemeral cleanup.
